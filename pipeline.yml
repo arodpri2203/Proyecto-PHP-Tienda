@@ -1,0 +1,31 @@
+pipeline {
+            agent {label 'linuxmint'}
+                stages {
+                        stage('Descargar ficheros configuración') {
+                            steps {
+                                echo 'Descargando ficheros...'
+                                sh 'rm -R .* || true'
+                                sh 'rm -R * || true'
+                                sh 'git clone https://github.com/arodpri2203/Proyecto-PHP-Tienda.git'
+                            }
+                        }
+                        stage('Deploy Docker Compose') {
+                            steps {
+                                echo 'Desplegando Compose...'
+                                sh  'docker-compose up -d'
+                            }
+                        }
+                        stage('Add DB Tables') {
+                            steps {
+                                echo 'Introduciendo tablas a la Base de Datos...'
+                                sh 'sudo docker-compose exec -T bbdd sh -c "mysql -u root -psecret iaw_db < /datos/scriptintroducciondatos.sql" || true'
+                            }
+                        }
+                        stage('Installing Composer') {
+                            steps {
+                                echo 'Instalando Composer...'
+                                sh 'sudo cd web/ && composer install || true'
+                            }
+                        }
+                }
+        }
